@@ -1,0 +1,21 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        tools:context="com.beyond.MainActivity">
+
+
+    <item
+        android:id="@+id/action_remote_repo_setting"
+        android:title="@string/remote_repo_setting"
+        android:orderInCategory="100"
+        app:showAsAction="never"
+        />
+
+
+    <item
+            android:id="@+id/action_sync_now"
+            android:title="Sync Now"
+            android:icon="@drawable/baseline_sync_white_24dp"
+            android:orderInCategory="100"
+            app:showAsAction="ifRoom" />
+</menu>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/nav_graph"
+        app:startDestination="@id/ListFragment">
+
+    <fragment
+            android:id="@+id/ListFragment"
+            android:name="com.beyond.ListFragment"
+            android:label="Note"
+            tools:layout="@layout/fragment_list">
+
+        <action
+                android:id="@+id/action_ListFragment_to_EditFragment"
+                app:destination="@id/EditFragment" />
+    </fragment>
+    <fragment
+            android:id="@+id/EditFragment"
+            android:name="com.beyond.EditFragment"
+            android:label="编辑"
+            tools:layout="@layout/fragment_edit">
+
+        <action
+                android:id="@+id/action_EditFragment_to_ListFragment"
+                app:destination="@id/ListFragment" />
+    </fragment>
+</navigation>
