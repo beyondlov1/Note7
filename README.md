@@ -11,6 +11,9 @@ https://blog.csdn.net/a386139471/article/details/107738615
 
 ###  build  
 mvn install git@github.com:beyondlov1/jgit-lite.git  
+mvn install git@github.com:beyondlov1/jgit-lite.git/jgit-utils  
+mvn install git@github.com:beyondlov1/jgit-lite.git/jgit-delta  
+mvn install git@github.com:beyondlov1/jgit-lite.git/jgit-main  
 mvn install git@github.com:beyondlov1/Time-NLP.git  
 
 #### android studio 下载gradle/sdk/ndk不畅:
