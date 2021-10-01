@@ -10,6 +10,7 @@ https://www.jianshu.com/p/a5bad045da73
 https://blog.csdn.net/a386139471/article/details/107738615  
 
 ###  build  
+mvn install git@github.com:beyondlov1/sardine-okhttp.git  
 mvn install git@github.com:beyondlov1/jgit-lite.git  
 mvn install git@github.com:beyondlov1/jgit-lite.git/jgit-utils  
 mvn install git@github.com:beyondlov1/jgit-lite.git/jgit-delta  
