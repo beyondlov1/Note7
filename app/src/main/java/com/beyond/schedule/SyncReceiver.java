@@ -18,11 +18,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
 
 /**
@@ -83,10 +83,12 @@ public class SyncReceiver extends BroadcastReceiver {
             if (currentListFragment != null){
                 currentListFragment.refreshList();
             }
+            Preferences.userRoot().putBoolean("last_sync_success", true);
             ToastUtil.toast(context, "auto sync complete");
-        } catch (ExecutionException | InterruptedException e) {
-            Log.e("SyncReceiver", "auto sync error", e);
+        } catch (Exception e) {
+            Preferences.userRoot().putBoolean("last_sync_success", false);
             ToastUtil.toast(context, "auto sync error");
+            Log.e("SyncReceiver", "auto sync error", e);
         }
     }
 }

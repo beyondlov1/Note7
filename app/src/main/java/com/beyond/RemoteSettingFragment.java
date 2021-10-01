@@ -103,6 +103,7 @@ public class RemoteSettingFragment extends Fragment {
                             if (remotePath.startsWith("https")|| remotePath.startsWith("http")){
                                 SardineStorage sardineStorage = new SardineStorage(remotePath, username, password);
                                 try {
+                                    sardineStorage.mkdir("");
                                     sardineStorage.mkdir(".auth");
                                     sardineStorage.delete(".auth");
                                     handler.post(new Runnable() {
@@ -124,6 +125,7 @@ public class RemoteSettingFragment extends Fragment {
                                             binding.remotePath.setText(null);
                                             binding.username.setText(null);
                                             binding.password.setText(null);
+                                            ToastUtil.toast(getContext(), "success");
                                         }
                                     });
                                 } catch (IOException e) {
@@ -131,6 +133,7 @@ public class RemoteSettingFragment extends Fragment {
                                     handler.post(new Runnable() {
                                         @Override
                                         public void run() {
+                                            ToastUtil.toast(getContext(), "fail:" + e.getMessage());
                                             binding.login.setEnabled(true);
                                         }
                                     });

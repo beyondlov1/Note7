@@ -6,6 +6,7 @@ import android.os.Handler;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.beyond.databinding.ActivityMainBinding;
 import com.beyond.jgit.util.PathUtils;
@@ -13,8 +14,8 @@ import com.beyond.util.GitUtils;
 import com.beyond.util.ToastUtil;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.List;
+import java.util.prefs.Preferences;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
@@ -79,10 +80,18 @@ public class MainActivity extends AppCompatActivity {
 //        });
     }
 
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
+        if (Preferences.userRoot().getBoolean("last_sync_success", true)){
+            MenuItem menuItem = menu.findItem(R.id.action_sync_now);
+            menuItem.setIcon(R.drawable.baseline_sync_white_24dp);
+        }else{
+            MenuItem menuItem =  menu.findItem(R.id.action_sync_now);
+            menuItem.setIcon(R.drawable.baseline_sync_problem_yellow_24dp);
+        }
         return true;
     }
 
@@ -102,10 +111,11 @@ public class MainActivity extends AppCompatActivity {
                         handler.post(new Runnable() {
                             @Override
                             public void run() {
-                                ToastUtil.toast(MainActivity.this, "sync started");
+                                ToastUtil.toast(MainActivity.this, "sync started", Toast.LENGTH_LONG);;
                             }
                         });
                         GitUtils.sync(repoRoot);
+                        Preferences.userRoot().putBoolean("last_sync_success", true);
                         handler.post(new Runnable() {
                             @Override
                             public void run() {
@@ -113,14 +123,15 @@ public class MainActivity extends AppCompatActivity {
                                 if (currentListFragment != null){
                                     currentListFragment.refreshList();
                                 }
-                                ToastUtil.toast(MainActivity.this, "sync success");
+                                ToastUtil.toast(MainActivity.this, "sync success", Toast.LENGTH_LONG);
                             }
                         });
-                    } catch (IOException e) {
+                    } catch (Exception e) {
+                        Preferences.userRoot().putBoolean("last_sync_success", false);
                         handler.post(new Runnable() {
                             @Override
                             public void run() {
-                                ToastUtil.toast(MainActivity.this, "sync error");
+                                ToastUtil.toast(MainActivity.this, "sync error", Toast.LENGTH_LONG);
                             }
                         });
                         Log.e("MainActivity", "sync error");
