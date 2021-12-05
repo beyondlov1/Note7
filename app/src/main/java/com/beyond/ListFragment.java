@@ -3,11 +3,13 @@ package com.beyond;
 import android.annotation.SuppressLint;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.beyond.databinding.FragmentListBinding;
+import com.beyond.entity.ListItem;
 import com.beyond.jgit.util.FileUtil;
 import com.beyond.jgit.util.PathUtils;
 import com.zhy.adapter.recyclerview.CommonAdapter;
@@ -41,9 +43,11 @@ public class ListFragment extends Fragment {
 
     String repoRoot;
 
-    private CommonAdapter<String> adapter;
+    private CommonAdapter<ListItem> adapter;
 
-    List<String> data = new ArrayList<>();
+    List<ListItem> data = new ArrayList<>();
+
+    Handler handler = new Handler();
 
     @Override
     public View onCreateView(
@@ -64,14 +68,11 @@ public class ListFragment extends Fragment {
         initData();
 
         RecyclerView listView = binding.list;
-        adapter = new CommonAdapter<String>(getContext(), R.layout.list_item, data) {
+        adapter = new CommonAdapter<ListItem>(getContext(), R.layout.list_item, data) {
             @Override
-            protected void convert(ViewHolder holder, String s, int position) {
-                holder.setText(R.id.list_item_name, s);
-            }
-
-            @Override
-            public void onBindViewHolder(ViewHolder holder, int position) {
+            protected void convert(ViewHolder holder, ListItem item, int position) {
+                holder.setText(R.id.list_item_name, item.getName());
+                holder.setText(R.id.list_item_content, item.getContent());
 
                 GradientDrawable gradientDrawable = new GradientDrawable();
                 gradientDrawable.setCornerRadius(13);
@@ -79,34 +80,17 @@ public class ListFragment extends Fragment {
                 View card = holder.getView(R.id.list_item_card);
                 card.setBackground(gradientDrawable);
 
-                final String name = data.get(position);
-                holder.setText(R.id.list_item_name, name);
-
-                File file = new File(PathUtils.concat(repoRoot, name));
-                String content = "";
-                if (!file.exists()) {
-                    return;
-                }
-                try {
-                    content = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                holder.setText(R.id.list_item_content, content);
-
-
                 holder.setOnClickListener(R.id.list_item, new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
                         Bundle bundle = new Bundle();
-                        bundle.putString("name", name);
-                        bundle.putString("path", file.getAbsolutePath());
+                        bundle.putString("name", item.getName());
+                        bundle.putString("path", item.getAbsPath());
                         bundle.putString("root", repoRoot);
                         NavHostFragment.findNavController(ListFragment.this)
                                 .navigate(R.id.action_ListFragment_to_EditFragment, bundle);
                     }
                 });
-
             }
         };
         listView.setAdapter(adapter);
@@ -137,17 +121,36 @@ public class ListFragment extends Fragment {
     }
 
     private void initData() {
-        data.clear();
-        List<File> files = FileUtil.listChildFilesAndDirs(repoRoot, x -> !x.getName().startsWith(".")).stream().filter(File::isFile).sorted(Comparator.comparing(x -> {
-            try {
-                return Files.getLastModifiedTime(x.toPath()).toMillis();
-            } catch (IOException e) {
-                return 0L;
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                List<ListItem> tmpData = new ArrayList<>();
+                List<File> files = FileUtil.listChildFilesAndDirs(repoRoot, x -> !x.getName().startsWith(".")).stream().filter(File::isFile).sorted(Comparator.comparing(x -> {
+                    try {
+                        return Files.getLastModifiedTime(x.toPath()).toMillis();
+                    } catch (IOException e) {
+                        return 0L;
+                    }
+                },Comparator.reverseOrder())).collect(Collectors.toList());
+                for (File file : files) {
+                    try {
+                        String content = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
+                        tmpData.add(new ListItem(file.getName(), content, file.getAbsolutePath()));
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                handler.post(new Runnable() {
+                    @SuppressLint("NotifyDataSetChanged")
+                    @Override
+                    public void run() {
+                        data.clear();
+                        data.addAll(tmpData);
+                        adapter.notifyDataSetChanged();
+                    }
+                });
             }
-        },Comparator.reverseOrder())).collect(Collectors.toList());
-        for (File file : files) {
-            data.add(file.getName());
-        }
+        }).start();
     }
 
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
@@ -163,6 +166,5 @@ public class ListFragment extends Fragment {
     @SuppressLint("NotifyDataSetChanged")
     public void refreshList() {
         initData();
-        adapter.notifyDataSetChanged();
     }
 }
