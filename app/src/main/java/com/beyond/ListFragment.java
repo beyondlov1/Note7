@@ -27,6 +27,10 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.stream.Collectors;
 
 import androidx.core.content.ContextCompat;
@@ -49,6 +53,8 @@ public class ListFragment extends Fragment {
 
     Handler handler = new Handler();
 
+    private static final ExecutorService executorService = Executors.newSingleThreadExecutor();
+
     @Override
     public View onCreateView(
             LayoutInflater inflater, ViewGroup container,
@@ -64,8 +70,6 @@ public class ListFragment extends Fragment {
         if (repoRoot == null){
             return binding.getRoot();
         }
-
-        initData();
 
         RecyclerView listView = binding.list;
         adapter = new CommonAdapter<ListItem>(getContext(), R.layout.list_item, data) {
@@ -115,13 +119,15 @@ public class ListFragment extends Fragment {
             }
         });
 
+        initData();
+
         ContextHolder.setCurrentListFragment(this);
         return binding.getRoot();
 
     }
 
     private void initData() {
-        new Thread(new Runnable() {
+        executorService.submit(new Runnable() {
             @Override
             public void run() {
                 List<ListItem> tmpData = new ArrayList<>();
@@ -150,7 +156,7 @@ public class ListFragment extends Fragment {
                     }
                 });
             }
-        }).start();
+        });
     }
 
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
