@@ -99,8 +99,8 @@ public class MainActivity extends AppCompatActivity {
         }
 
         MenuItem syncMenuItem =  menu.findItem(R.id.action_sync_switch);
-        boolean old = Preferences.userRoot().getBoolean("sync_switch", false);
-        syncMenuItem.setTitle("sync " + (!old ? "opened" : "closed"));
+        boolean syncOpened = Preferences.userRoot().getBoolean("sync_switch", false);
+        syncMenuItem.setTitle("sync " + (syncOpened ? "opened" : "closed"));
         return true;
     }
 

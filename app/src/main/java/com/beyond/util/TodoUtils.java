@@ -19,7 +19,6 @@ public abstract class TodoUtils {
     public static List<Todo> parse(String content) throws IOException, ParseException {
         List<Todo> result = new ArrayList<>();
         String[] lines = StringUtils.splitPreserveAllTokens(content, "\n");
-        List<String> newLines = new ArrayList<>();
         for (String line : lines) {
             Todo parsedTodo = Todo.parseFrom(line);
             result.add(parsedTodo);

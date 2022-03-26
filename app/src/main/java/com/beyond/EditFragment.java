@@ -13,6 +13,7 @@ import android.view.inputmethod.InputMethodManager;
 import com.beyond.databinding.FragmentEditBinding;
 import com.beyond.jgit.util.PathUtils;
 import com.beyond.util.CalendarUtils;
+import com.beyond.util.InputMethodUtil;
 import com.beyond.util.MyPermissionUtils;
 import com.beyond.util.TodoUtils;
 
@@ -76,6 +77,9 @@ public class EditFragment extends Fragment {
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        binding.contentEditText.requestFocus();
+        InputMethodManager inputMethodManager = (InputMethodManager) view.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+        inputMethodManager.showSoftInput(view, 0);
         binding.saveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -141,18 +145,19 @@ public class EditFragment extends Fragment {
         try {
             String content = binding.contentEditText.getText().toString();
             if (StringUtils.isNotBlank(content)) {
-                if (name.endsWith(".todo")) {
-                    List<Todo> parsed = TodoUtils.parse(content);
-                    for (Todo todo : parsed) {
-                        this.setupReminder(todo);
-                    }
-                    String newContent = TodoUtils.format(parsed);
-                    if (!StringUtils.equals(newContent, initContent)) {
+                List<Todo> parsed = TodoUtils.parse(content);
+                boolean createdNewReminder = false;
+                for (Todo todo : parsed) {
+                    createdNewReminder = createdNewReminder || this.setupReminder(todo);
+                }
+                String newContent = TodoUtils.format(parsed);
+                if (!StringUtils.equals(newContent, initContent)) {
+                    if (!name.endsWith(".todo") && createdNewReminder) {
+                        File todoFile = new File(PathUtils.concat(repoRoot, name + ".todo"));
+                        FileUtils.writeStringToFile(todoFile, newContent, StandardCharsets.UTF_8);
+                        FileUtils.deleteQuietly(file);
+                    }else{
                         FileUtils.writeStringToFile(file, newContent, StandardCharsets.UTF_8);
-                    }
-                } else {
-                    if (!StringUtils.equals(content, initContent)){
-                        FileUtils.writeStringToFile(file, content, StandardCharsets.UTF_8);
                     }
                 }
             } else {
@@ -163,10 +168,12 @@ public class EditFragment extends Fragment {
         }
     }
 
-    private void setupReminder(Todo todo) {
+    private boolean setupReminder(Todo todo) {
         if (todo.getRemindTime() != null && todo.getSource() != Todo.Source.READ) {
             CalendarUtils.insertEventAndReminder(getContext(), todo.getOriginText(), null, todo.getRemindTime());
+            return true;
         }
+        return false;
     }
 
     private void back() {
