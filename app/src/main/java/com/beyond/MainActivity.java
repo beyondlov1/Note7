@@ -6,6 +6,9 @@ import android.os.Handler;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.CompoundButton;
+import android.widget.Switch;
 import android.widget.Toast;
 
 import com.beyond.databinding.ActivityMainBinding;
@@ -18,12 +21,14 @@ import java.util.List;
 import java.util.prefs.Preferences;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SwitchCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
+import androidx.preference.Preference;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -92,6 +97,10 @@ public class MainActivity extends AppCompatActivity {
             MenuItem menuItem =  menu.findItem(R.id.action_sync_now);
             menuItem.setIcon(R.drawable.baseline_sync_problem_yellow_24dp);
         }
+
+        MenuItem syncMenuItem =  menu.findItem(R.id.action_sync_switch);
+        boolean old = Preferences.userRoot().getBoolean("sync_switch", false);
+        syncMenuItem.setTitle("sync " + (!old ? "opened" : "closed"));
         return true;
     }
 
@@ -147,6 +156,14 @@ public class MainActivity extends AppCompatActivity {
             startActivity(intent);
             return true;
         }
+
+        if (id == R.id.action_sync_switch) {
+            boolean old = Preferences.userRoot().getBoolean("sync_switch", false);
+            Preferences.userRoot().putBoolean("sync_switch", !old);
+            item.setTitle("sync " + (!old ? "opened" : "closed"));
+            return true;
+        }
+
 
         return super.onOptionsItemSelected(item);
     }

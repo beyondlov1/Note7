@@ -40,6 +40,10 @@ public class SyncReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
+        if (!Preferences.userRoot().getBoolean("sync_switch", false)){
+            Log.d("SyncReceiver", "onReceive: switch is off, skip sync");
+            return;
+        }
         if (lastStart.get() > lastEnd.get() ){
             Log.i("SyncReceiver", "last is running, ignore");
             return;
