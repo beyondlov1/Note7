@@ -39,6 +39,11 @@
         <service
             android:name=".schedule.SyncScheduleService"
             android:launchMode="singleInstance" />
+
+        <service
+            android:name=".server.HttpServerService"
+            android:launchMode="singleInstance" />
+
     </application>
     <uses-permission android:name="android.permission.READ_CALENDAR" />
     <uses-permission android:name="android.permission.INTERNET" />

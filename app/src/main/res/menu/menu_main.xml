@@ -21,4 +21,8 @@
     <item
             android:title="sync"
             android:id="@+id/action_sync_switch" />
+
+    <item
+            android:title="http"
+            android:id="@+id/action_http_switch" />
 </menu>

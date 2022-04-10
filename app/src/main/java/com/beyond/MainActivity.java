@@ -6,13 +6,11 @@ import android.os.Handler;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.CompoundButton;
-import android.widget.Switch;
 import android.widget.Toast;
 
 import com.beyond.databinding.ActivityMainBinding;
 import com.beyond.jgit.util.PathUtils;
+import com.beyond.server.HttpServerService;
 import com.beyond.util.GitUtils;
 import com.beyond.util.ToastUtil;
 
@@ -21,14 +19,12 @@ import java.util.List;
 import java.util.prefs.Preferences;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.SwitchCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
-import androidx.preference.Preference;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -101,6 +97,10 @@ public class MainActivity extends AppCompatActivity {
         MenuItem syncMenuItem =  menu.findItem(R.id.action_sync_switch);
         boolean syncOpened = Preferences.userRoot().getBoolean("sync_switch", false);
         syncMenuItem.setTitle("sync " + (syncOpened ? "opened" : "closed"));
+
+        MenuItem httpMenuItem =  menu.findItem(R.id.action_http_switch);
+        boolean httpOpened = Preferences.userRoot().getBoolean("http_switch", false);
+        httpMenuItem.setTitle("http " + (httpOpened ? "opened" : "closed"));
         return true;
     }
 
@@ -164,6 +164,19 @@ public class MainActivity extends AppCompatActivity {
             return true;
         }
 
+        if (id == R.id.action_http_switch) {
+            boolean old = Preferences.userRoot().getBoolean("http_opened", false);
+            Preferences.userRoot().putBoolean("http_opened", !old);
+            item.setTitle("http " + (!old ? "opened" : "closed"));
+            if (Preferences.userRoot().getBoolean("http_opened", false)){
+                Intent intent2 = new Intent(this, HttpServerService.class);
+                startService(intent2);
+            }else{
+                Intent intent2 = new Intent(this, HttpServerService.class);
+                stopService(intent2);
+            }
+            return true;
+        }
 
         return super.onOptionsItemSelected(item);
     }
